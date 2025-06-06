@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hierarchy_table_app/hierarchy_table/bloc/hierarchy_table_bloc.dart';
+import 'package:hierarchy_table_app/hierarchy_table/widgets/hierarchy_table.dart';
 
 class HierarchyTableView extends StatelessWidget {
   const HierarchyTableView({super.key});
@@ -15,9 +16,7 @@ class HierarchyTableView extends StatelessWidget {
         HierarchyTableLoading() => const Center(
           child: CircularProgressIndicator(),
         ),
-        HierarchyTableSuccess(:final nodes) => Center(
-          child: Text('Success: $nodes'),
-        ),
+        HierarchyTableSuccess(:final rows) => HierarchyTable(rows: rows),
         HierarchyTableFailure(:final String error) => Center(
           child: Text('Failure: $error'),
         ),
