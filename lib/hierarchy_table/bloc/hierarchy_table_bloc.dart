@@ -23,7 +23,6 @@ class HierarchyTableBloc
   // Internal state, prevents deep state comparison, fine as long as we
   // do not need bloc replayability
   final List<Node> _nodes = [];
-  final Set<String> _expanded = {};
 
   Future<void> _onLoadRequested(
     _LoadRequested event,
@@ -33,12 +32,16 @@ class HierarchyTableBloc
     try {
       final nodes = await _nodeRepository.getNodes();
 
-      _expanded.clear();
       _nodes
         ..clear()
         ..addAll(nodes);
 
-      emit(HierarchyTableState.success(rows: _constructRows(nodes)));
+      emit(
+        HierarchyTableState.success(
+          rows: _constructRows(nodes, {}),
+          expanded: {},
+        ),
+      );
     } catch (e) {
       emit(HierarchyTableState.failure(error: e.toString()));
       rethrow;
@@ -46,31 +49,48 @@ class HierarchyTableBloc
   }
 
   void _onRowToggled(_RowToggled event, Emitter<HierarchyTableState> emit) {
-    final key = event.path.join('.');
+    if (state case HierarchyTableSuccess(:final expanded)) {
+      final newExpanded = Set<String>.from(expanded);
 
-    if (_expanded.contains(key)) {
-      _expanded.removeWhere(
-        (element) => element == key || element.startsWith('$key.'),
+      final key = event.path.join('.');
+
+      if (expanded.contains(key)) {
+        newExpanded.removeWhere(
+          (element) => element == key || element.startsWith('$key.'),
+        );
+      } else {
+        newExpanded.add(key);
+      }
+
+      emit(
+        HierarchyTableState.success(
+          rows: _constructRows(_nodes, newExpanded),
+          expanded: newExpanded,
+        ),
       );
-    } else {
-      _expanded.add(key);
     }
-
-    emit(HierarchyTableState.success(rows: _constructRows(_nodes)));
   }
 
   void _onRowDeleted(_RowDeleted event, Emitter<HierarchyTableState> emit) {
-    final key = event.path.join('.');
+    if (state case HierarchyTableSuccess(:final expanded)) {
+      final key = event.path.join('.');
 
-    // Remove node
-    _removeNode(_nodes, event.path);
+      // Remove node
+      _removeNode(_nodes, event.path);
 
-    // Remove any expansions
-    _expanded.removeWhere(
-      (element) => element == key || element.startsWith('$key.'),
-    );
+      // Remove any expansions
+      final newExpanded = Set<String>.from(expanded)
+        ..removeWhere(
+          (element) => element == key || element.startsWith('$key.'),
+        );
 
-    emit(HierarchyTableState.success(rows: _constructRows(_nodes)));
+      emit(
+        HierarchyTableState.success(
+          rows: _constructRows(_nodes, newExpanded),
+          expanded: newExpanded,
+        ),
+      );
+    }
   }
 
   /// Removes node from list of nodes by its path
@@ -87,34 +107,42 @@ class HierarchyTableBloc
     final subPath = path.sublist(1);
     final node = nodes[index];
 
-    for (final relation in node.children.values) {
-      return _removeNode(relation.records, subPath);
+    for (final entry in node.children.entries) {
+      if (_removeNode(entry.value.records, subPath)) {
+        if (entry.value.records.isEmpty) {
+          node.children.remove(entry.key);
+        }
+
+        return true;
+      }
     }
 
     return false;
   }
 
   /// Constructs rows from nodes
-  List<NodeRow> _constructRows(List<Node> nodes) {
-    final rows = <NodeRow>[_constructHeaderRow(nodes, 0)];
+  List<NodeRow> _constructRows(List<Node> nodes, Set<String> expanded) {
+    final rows = <NodeRow>[_constructHeaderRow('root', nodes, 0)];
 
     void processNode(Node node, List<int> path) {
       // Add node row to rows
       rows.add(DataNodeRow(node: node, path: path));
 
       // If node is not expanded, do not process its relations
-      if (!_expanded.contains(path.join('.'))) {
+      if (!expanded.contains(path.join('.'))) {
         return;
       }
 
       // Process each relation
-      for (final relation in node.children.values) {
+      for (final entry in node.children.entries) {
         // Add relation header row to rows
-        rows.add(_constructHeaderRow(relation.records, path.length + 1));
+        rows.add(
+          _constructHeaderRow(entry.key, entry.value.records, path.length),
+        );
 
         // Process each record in relation
-        for (var i = 0; i < relation.records.length; i++) {
-          processNode(relation.records[i], path + [i]);
+        for (var i = 0; i < entry.value.records.length; i++) {
+          processNode(entry.value.records[i], path + [i]);
         }
       }
     }
@@ -128,12 +156,16 @@ class HierarchyTableBloc
   }
 
   /// Takes list of nodes and returns header row based on the data keys
-  HeaderNodeRow _constructHeaderRow(List<Node> nodes, int depth) {
+  HeaderNodeRow _constructHeaderRow(
+    String relation,
+    List<Node> nodes,
+    int depth,
+  ) {
     final cols = <String>{};
     for (final node in nodes) {
       cols.addAll(node.data.keys);
     }
 
-    return HeaderNodeRow(keys: cols.toList(), depth: depth);
+    return HeaderNodeRow(relation: relation, keys: cols.toList(), depth: depth);
   }
 }

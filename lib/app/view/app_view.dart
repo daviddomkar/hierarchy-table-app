@@ -9,9 +9,11 @@ class AppView extends StatelessWidget {
     return MaterialApp(
       title: 'Hierarchy Table',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
+        brightness: Brightness.dark,
+        colorScheme: const ColorScheme.dark(
+          primary: Colors.purple,
+          onPrimary: Colors.white,
+          surfaceTint: Color(0xff242424),
         ),
       ),
       home: const HierarchyTablePage(),

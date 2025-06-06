@@ -81,23 +81,11 @@ as Map<String, Relation>,
 @JsonSerializable()
 
 class _Node implements Node {
-  const _Node({required final  Map<String, dynamic> data, required final  Map<String, Relation> children}): _data = data,_children = children;
+  const _Node({required this.data, required this.children});
   factory _Node.fromJson(Map<String, dynamic> json) => _$NodeFromJson(json);
 
- final  Map<String, dynamic> _data;
-@override Map<String, dynamic> get data {
-  if (_data is EqualUnmodifiableMapView) return _data;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableMapView(_data);
-}
-
- final  Map<String, Relation> _children;
-@override Map<String, Relation> get children {
-  if (_children is EqualUnmodifiableMapView) return _children;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableMapView(_children);
-}
-
+@override final  Map<String, dynamic> data;
+@override final  Map<String, Relation> children;
 
 /// Create a copy of Node
 /// with the given fields replaced by the non-null parameter values.
@@ -112,12 +100,12 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Node&&const DeepCollectionEquality().equals(other._data, _data)&&const DeepCollectionEquality().equals(other._children, _children));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Node&&const DeepCollectionEquality().equals(other.data, data)&&const DeepCollectionEquality().equals(other.children, children));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_data),const DeepCollectionEquality().hash(_children));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(data),const DeepCollectionEquality().hash(children));
 
 @override
 String toString() {
@@ -151,8 +139,8 @@ class __$NodeCopyWithImpl<$Res>
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? data = null,Object? children = null,}) {
   return _then(_Node(
-data: null == data ? _self._data : data // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>,children: null == children ? _self._children : children // ignore: cast_nullable_to_non_nullable
+data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,children: null == children ? _self.children : children // ignore: cast_nullable_to_non_nullable
 as Map<String, Relation>,
   ));
 }

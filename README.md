@@ -6,4 +6,4 @@ This app is a simple app that displays a hierarchy table according to the input 
 
 - Error handling
 - Localization
-- Parse json data asynchronously (in isolate)
+- Immutable collections

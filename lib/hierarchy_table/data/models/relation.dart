@@ -4,7 +4,7 @@ import 'package:hierarchy_table_app/hierarchy_table/data/models/node.dart';
 part 'relation.freezed.dart';
 part 'relation.g.dart';
 
-@freezed
+@Freezed(makeCollectionsUnmodifiable: false)
 abstract class Relation with _$Relation {
   const factory Relation({required List<Node> records}) = _Relation;
 
