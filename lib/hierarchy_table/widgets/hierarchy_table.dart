@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hierarchy_table_app/hierarchy_table/bloc/hierarchy_table_bloc.dart';
-import 'package:hierarchy_table_app/hierarchy_table/data/models/node.dart';
 
 const _rowHeight = 48.0;
 const _depthIndent = 48.0;
@@ -46,11 +45,12 @@ class _HierarchyTableState extends State<HierarchyTable> {
             depth: depth,
             requestColumnWidth: _getColumnWidth,
           ),
-          DataNodeRow(:final node, :final path) => _DataRow(
+          DataNodeRow(:final data, :final path, :final hasChildren) => _DataRow(
             key: ValueKey('d_${row.path.join('.')}'),
-            node: node,
+            data: data,
             alternate: index.isEven,
             path: path,
+            hasChildren: hasChildren,
             requestColumnWidth: _getColumnWidth,
           ),
         };
@@ -88,6 +88,7 @@ class _HeaderRow extends StatelessWidget {
                 ),
               ),
             ),
+          const _Cell(width: _depthIndent + 8, child: Text('Actions')),
         ],
       ),
     );
@@ -96,14 +97,16 @@ class _HeaderRow extends StatelessWidget {
 
 class _DataRow extends StatelessWidget {
   const _DataRow({
-    required this.node,
+    required this.data,
+    required this.hasChildren,
     required this.alternate,
     required this.path,
     required this.requestColumnWidth,
     super.key,
   });
 
-  final Node node;
+  final Map<String, dynamic> data;
+  final bool hasChildren;
   final bool alternate;
   final List<int> path;
   final double Function(BuildContext, String) requestColumnWidth;
@@ -122,7 +125,7 @@ class _DataRow extends StatelessWidget {
       padding: EdgeInsets.only(left: (path.length - 1) * _depthIndent),
       child: Row(
         children: [
-          if (node.children.isNotEmpty)
+          if (hasChildren)
             _Cell(
               width: 48,
               child: IconButton(
@@ -137,8 +140,8 @@ class _DataRow extends StatelessWidget {
                 ),
               ),
             ),
-          if (node.children.isEmpty) const SizedBox.square(dimension: 48),
-          for (final entry in node.data.entries)
+          if (!hasChildren) const SizedBox.square(dimension: 48),
+          for (final entry in data.entries)
             _Cell(
               width: requestColumnWidth(context, entry.key),
               child: Text(
@@ -148,9 +151,8 @@ class _DataRow extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-          const Spacer(),
           _Cell(
-            width: 48,
+            width: _depthIndent + 8,
             child: IconButton(
               onPressed: () {
                 context.read<HierarchyTableBloc>().add(

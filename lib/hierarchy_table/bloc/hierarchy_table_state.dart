@@ -8,8 +8,11 @@ sealed class NodeRow with _$NodeRow {
     required int depth,
   }) = HeaderNodeRow;
 
-  const factory NodeRow.data({required Node node, required List<int> path}) =
-      DataNodeRow;
+  const factory NodeRow.data({
+    required Map<String, dynamic> data,
+    required bool hasChildren,
+    required List<int> path,
+  }) = DataNodeRow;
 }
 
 @freezed

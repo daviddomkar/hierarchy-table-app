@@ -126,7 +126,13 @@ class HierarchyTableBloc
 
     void processNode(Node node, List<int> path) {
       // Add node row to rows
-      rows.add(DataNodeRow(node: node, path: path));
+      rows.add(
+        DataNodeRow(
+          data: node.data,
+          hasChildren: node.children.isNotEmpty,
+          path: path,
+        ),
+      );
 
       // If node is not expanded, do not process its relations
       if (!expanded.contains(path.join('.'))) {

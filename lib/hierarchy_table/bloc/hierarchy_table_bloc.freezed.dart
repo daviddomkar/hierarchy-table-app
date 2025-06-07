@@ -328,10 +328,17 @@ as int,
 
 
 class DataNodeRow implements NodeRow {
-  const DataNodeRow({required this.node, required final  List<int> path}): _path = path;
+  const DataNodeRow({required final  Map<String, dynamic> data, required this.hasChildren, required final  List<int> path}): _data = data,_path = path;
   
 
- final  Node node;
+ final  Map<String, dynamic> _data;
+ Map<String, dynamic> get data {
+  if (_data is EqualUnmodifiableMapView) return _data;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_data);
+}
+
+ final  bool hasChildren;
  final  List<int> _path;
  List<int> get path {
   if (_path is EqualUnmodifiableListView) return _path;
@@ -350,16 +357,16 @@ $DataNodeRowCopyWith<DataNodeRow> get copyWith => _$DataNodeRowCopyWithImpl<Data
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DataNodeRow&&(identical(other.node, node) || other.node == node)&&const DeepCollectionEquality().equals(other._path, _path));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DataNodeRow&&const DeepCollectionEquality().equals(other._data, _data)&&(identical(other.hasChildren, hasChildren) || other.hasChildren == hasChildren)&&const DeepCollectionEquality().equals(other._path, _path));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,node,const DeepCollectionEquality().hash(_path));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_data),hasChildren,const DeepCollectionEquality().hash(_path));
 
 @override
 String toString() {
-  return 'NodeRow.data(node: $node, path: $path)';
+  return 'NodeRow.data(data: $data, hasChildren: $hasChildren, path: $path)';
 }
 
 
@@ -370,11 +377,11 @@ abstract mixin class $DataNodeRowCopyWith<$Res> implements $NodeRowCopyWith<$Res
   factory $DataNodeRowCopyWith(DataNodeRow value, $Res Function(DataNodeRow) _then) = _$DataNodeRowCopyWithImpl;
 @useResult
 $Res call({
- Node node, List<int> path
+ Map<String, dynamic> data, bool hasChildren, List<int> path
 });
 
 
-$NodeCopyWith<$Res> get node;
+
 
 }
 /// @nodoc
@@ -387,24 +394,16 @@ class _$DataNodeRowCopyWithImpl<$Res>
 
 /// Create a copy of NodeRow
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? node = null,Object? path = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? data = null,Object? hasChildren = null,Object? path = null,}) {
   return _then(DataNodeRow(
-node: null == node ? _self.node : node // ignore: cast_nullable_to_non_nullable
-as Node,path: null == path ? _self._path : path // ignore: cast_nullable_to_non_nullable
+data: null == data ? _self._data : data // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,hasChildren: null == hasChildren ? _self.hasChildren : hasChildren // ignore: cast_nullable_to_non_nullable
+as bool,path: null == path ? _self._path : path // ignore: cast_nullable_to_non_nullable
 as List<int>,
   ));
 }
 
-/// Create a copy of NodeRow
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$NodeCopyWith<$Res> get node {
-  
-  return $NodeCopyWith<$Res>(_self.node, (value) {
-    return _then(_self.copyWith(node: value));
-  });
-}
+
 }
 
 /// @nodoc
