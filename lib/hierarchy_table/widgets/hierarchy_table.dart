@@ -152,7 +152,7 @@ class _DataRow extends StatelessWidget {
               ),
             ),
           _Cell(
-            width: _depthIndent + ,
+            width: _depthIndent + 16,
             child: IconButton(
               onPressed: () {
                 context.read<HierarchyTableBloc>().add(
