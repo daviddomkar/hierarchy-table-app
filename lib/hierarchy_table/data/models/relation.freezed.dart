@@ -80,10 +80,16 @@ as List<Node>,
 @JsonSerializable()
 
 class _Relation implements Relation {
-  const _Relation({required this.records});
+  const _Relation({required final  List<Node> records}): _records = records;
   factory _Relation.fromJson(Map<String, dynamic> json) => _$RelationFromJson(json);
 
-@override final  List<Node> records;
+ final  List<Node> _records;
+@override List<Node> get records {
+  if (_records is EqualUnmodifiableListView) return _records;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_records);
+}
+
 
 /// Create a copy of Relation
 /// with the given fields replaced by the non-null parameter values.
@@ -98,12 +104,12 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Relation&&const DeepCollectionEquality().equals(other.records, records));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Relation&&const DeepCollectionEquality().equals(other._records, _records));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(records));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_records));
 
 @override
 String toString() {
@@ -137,7 +143,7 @@ class __$RelationCopyWithImpl<$Res>
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? records = null,}) {
   return _then(_Relation(
-records: null == records ? _self.records : records // ignore: cast_nullable_to_non_nullable
+records: null == records ? _self._records : records // ignore: cast_nullable_to_non_nullable
 as List<Node>,
   ));
 }

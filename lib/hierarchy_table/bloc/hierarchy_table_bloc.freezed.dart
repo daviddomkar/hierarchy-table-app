@@ -77,89 +77,11 @@ String toString() {
 /// @nodoc
 
 
-class _RowToggled implements HierarchyTableEvent {
-  const _RowToggled({required final  List<int> path}): _path = path;
-  
-
- final  List<int> _path;
- List<int> get path {
-  if (_path is EqualUnmodifiableListView) return _path;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_path);
-}
-
-
-/// Create a copy of HierarchyTableEvent
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$RowToggledCopyWith<_RowToggled> get copyWith => __$RowToggledCopyWithImpl<_RowToggled>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RowToggled&&const DeepCollectionEquality().equals(other._path, _path));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_path));
-
-@override
-String toString() {
-  return 'HierarchyTableEvent.rowToggled(path: $path)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class _$RowToggledCopyWith<$Res> implements $HierarchyTableEventCopyWith<$Res> {
-  factory _$RowToggledCopyWith(_RowToggled value, $Res Function(_RowToggled) _then) = __$RowToggledCopyWithImpl;
-@useResult
-$Res call({
- List<int> path
-});
-
-
-
-
-}
-/// @nodoc
-class __$RowToggledCopyWithImpl<$Res>
-    implements _$RowToggledCopyWith<$Res> {
-  __$RowToggledCopyWithImpl(this._self, this._then);
-
-  final _RowToggled _self;
-  final $Res Function(_RowToggled) _then;
-
-/// Create a copy of HierarchyTableEvent
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? path = null,}) {
-  return _then(_RowToggled(
-path: null == path ? _self._path : path // ignore: cast_nullable_to_non_nullable
-as List<int>,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
 class _RowDeleted implements HierarchyTableEvent {
-  const _RowDeleted({required final  List<int> path}): _path = path;
+  const _RowDeleted({required this.node});
   
 
- final  List<int> _path;
- List<int> get path {
-  if (_path is EqualUnmodifiableListView) return _path;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_path);
-}
-
+ final  NodeRow node;
 
 /// Create a copy of HierarchyTableEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -171,16 +93,16 @@ _$RowDeletedCopyWith<_RowDeleted> get copyWith => __$RowDeletedCopyWithImpl<_Row
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RowDeleted&&const DeepCollectionEquality().equals(other._path, _path));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RowDeleted&&(identical(other.node, node) || other.node == node));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_path));
+int get hashCode => Object.hash(runtimeType,node);
 
 @override
 String toString() {
-  return 'HierarchyTableEvent.rowDeleted(path: $path)';
+  return 'HierarchyTableEvent.rowDeleted(node: $node)';
 }
 
 
@@ -191,11 +113,11 @@ abstract mixin class _$RowDeletedCopyWith<$Res> implements $HierarchyTableEventC
   factory _$RowDeletedCopyWith(_RowDeleted value, $Res Function(_RowDeleted) _then) = __$RowDeletedCopyWithImpl;
 @useResult
 $Res call({
- List<int> path
+ NodeRow node
 });
 
 
-
+$NodeRowCopyWith<$Res> get node;
 
 }
 /// @nodoc
@@ -208,14 +130,23 @@ class __$RowDeletedCopyWithImpl<$Res>
 
 /// Create a copy of HierarchyTableEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? path = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? node = null,}) {
   return _then(_RowDeleted(
-path: null == path ? _self._path : path // ignore: cast_nullable_to_non_nullable
-as List<int>,
+node: null == node ? _self.node : node // ignore: cast_nullable_to_non_nullable
+as NodeRow,
   ));
 }
 
-
+/// Create a copy of HierarchyTableEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$NodeRowCopyWith<$Res> get node {
+  
+  return $NodeRowCopyWith<$Res>(_self.node, (value) {
+    return _then(_self.copyWith(node: value));
+  });
+}
 }
 
 /// @nodoc
@@ -252,7 +183,7 @@ $NodeRowCopyWith(NodeRow _, $Res Function(NodeRow) __);
 
 
 class HeaderNodeRow implements NodeRow {
-  const HeaderNodeRow({required this.relation, required final  List<String> keys, required this.depth}): _keys = keys;
+  const HeaderNodeRow({required this.relation, required final  List<String> keys}): _keys = keys;
   
 
  final  String relation;
@@ -263,7 +194,6 @@ class HeaderNodeRow implements NodeRow {
   return EqualUnmodifiableListView(_keys);
 }
 
- final  int depth;
 
 /// Create a copy of NodeRow
 /// with the given fields replaced by the non-null parameter values.
@@ -275,16 +205,16 @@ $HeaderNodeRowCopyWith<HeaderNodeRow> get copyWith => _$HeaderNodeRowCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HeaderNodeRow&&(identical(other.relation, relation) || other.relation == relation)&&const DeepCollectionEquality().equals(other._keys, _keys)&&(identical(other.depth, depth) || other.depth == depth));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HeaderNodeRow&&(identical(other.relation, relation) || other.relation == relation)&&const DeepCollectionEquality().equals(other._keys, _keys));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,relation,const DeepCollectionEquality().hash(_keys),depth);
+int get hashCode => Object.hash(runtimeType,relation,const DeepCollectionEquality().hash(_keys));
 
 @override
 String toString() {
-  return 'NodeRow.header(relation: $relation, keys: $keys, depth: $depth)';
+  return 'NodeRow.header(relation: $relation, keys: $keys)';
 }
 
 
@@ -295,7 +225,7 @@ abstract mixin class $HeaderNodeRowCopyWith<$Res> implements $NodeRowCopyWith<$R
   factory $HeaderNodeRowCopyWith(HeaderNodeRow value, $Res Function(HeaderNodeRow) _then) = _$HeaderNodeRowCopyWithImpl;
 @useResult
 $Res call({
- String relation, List<String> keys, int depth
+ String relation, List<String> keys
 });
 
 
@@ -312,12 +242,11 @@ class _$HeaderNodeRowCopyWithImpl<$Res>
 
 /// Create a copy of NodeRow
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? relation = null,Object? keys = null,Object? depth = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? relation = null,Object? keys = null,}) {
   return _then(HeaderNodeRow(
 relation: null == relation ? _self.relation : relation // ignore: cast_nullable_to_non_nullable
 as String,keys: null == keys ? _self._keys : keys // ignore: cast_nullable_to_non_nullable
-as List<String>,depth: null == depth ? _self.depth : depth // ignore: cast_nullable_to_non_nullable
-as int,
+as List<String>,
   ));
 }
 
@@ -328,15 +257,15 @@ as int,
 
 
 class DataNodeRow implements NodeRow {
-  const DataNodeRow({required this.node, required final  List<int> path}): _path = path;
+  const DataNodeRow({required this.node, final  List<NodeRow> children = const []}): _children = children;
   
 
  final  Node node;
- final  List<int> _path;
- List<int> get path {
-  if (_path is EqualUnmodifiableListView) return _path;
+ final  List<NodeRow> _children;
+@JsonKey() List<NodeRow> get children {
+  if (_children is EqualUnmodifiableListView) return _children;
   // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_path);
+  return EqualUnmodifiableListView(_children);
 }
 
 
@@ -350,16 +279,16 @@ $DataNodeRowCopyWith<DataNodeRow> get copyWith => _$DataNodeRowCopyWithImpl<Data
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DataNodeRow&&(identical(other.node, node) || other.node == node)&&const DeepCollectionEquality().equals(other._path, _path));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DataNodeRow&&(identical(other.node, node) || other.node == node)&&const DeepCollectionEquality().equals(other._children, _children));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,node,const DeepCollectionEquality().hash(_path));
+int get hashCode => Object.hash(runtimeType,node,const DeepCollectionEquality().hash(_children));
 
 @override
 String toString() {
-  return 'NodeRow.data(node: $node, path: $path)';
+  return 'NodeRow.data(node: $node, children: $children)';
 }
 
 
@@ -370,7 +299,7 @@ abstract mixin class $DataNodeRowCopyWith<$Res> implements $NodeRowCopyWith<$Res
   factory $DataNodeRowCopyWith(DataNodeRow value, $Res Function(DataNodeRow) _then) = _$DataNodeRowCopyWithImpl;
 @useResult
 $Res call({
- Node node, List<int> path
+ Node node, List<NodeRow> children
 });
 
 
@@ -387,11 +316,11 @@ class _$DataNodeRowCopyWithImpl<$Res>
 
 /// Create a copy of NodeRow
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? node = null,Object? path = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? node = null,Object? children = null,}) {
   return _then(DataNodeRow(
 node: null == node ? _self.node : node // ignore: cast_nullable_to_non_nullable
-as Node,path: null == path ? _self._path : path // ignore: cast_nullable_to_non_nullable
-as List<int>,
+as Node,children: null == children ? _self._children : children // ignore: cast_nullable_to_non_nullable
+as List<NodeRow>,
   ));
 }
 
@@ -505,8 +434,15 @@ String toString() {
 
 
 class HierarchyTableSuccess implements HierarchyTableState {
-  const HierarchyTableSuccess({required final  List<NodeRow> rows, required final  Set<String> expanded}): _rows = rows,_expanded = expanded;
+  const HierarchyTableSuccess({required final  List<Node> nodes, required final  List<NodeRow> rows, required final  Set<String> expanded}): _nodes = nodes,_rows = rows,_expanded = expanded;
   
+
+ final  List<Node> _nodes;
+ List<Node> get nodes {
+  if (_nodes is EqualUnmodifiableListView) return _nodes;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_nodes);
+}
 
  final  List<NodeRow> _rows;
  List<NodeRow> get rows {
@@ -533,16 +469,16 @@ $HierarchyTableSuccessCopyWith<HierarchyTableSuccess> get copyWith => _$Hierarch
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HierarchyTableSuccess&&const DeepCollectionEquality().equals(other._rows, _rows)&&const DeepCollectionEquality().equals(other._expanded, _expanded));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HierarchyTableSuccess&&const DeepCollectionEquality().equals(other._nodes, _nodes)&&const DeepCollectionEquality().equals(other._rows, _rows)&&const DeepCollectionEquality().equals(other._expanded, _expanded));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_rows),const DeepCollectionEquality().hash(_expanded));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_nodes),const DeepCollectionEquality().hash(_rows),const DeepCollectionEquality().hash(_expanded));
 
 @override
 String toString() {
-  return 'HierarchyTableState.success(rows: $rows, expanded: $expanded)';
+  return 'HierarchyTableState.success(nodes: $nodes, rows: $rows, expanded: $expanded)';
 }
 
 
@@ -553,7 +489,7 @@ abstract mixin class $HierarchyTableSuccessCopyWith<$Res> implements $HierarchyT
   factory $HierarchyTableSuccessCopyWith(HierarchyTableSuccess value, $Res Function(HierarchyTableSuccess) _then) = _$HierarchyTableSuccessCopyWithImpl;
 @useResult
 $Res call({
- List<NodeRow> rows, Set<String> expanded
+ List<Node> nodes, List<NodeRow> rows, Set<String> expanded
 });
 
 
@@ -570,9 +506,10 @@ class _$HierarchyTableSuccessCopyWithImpl<$Res>
 
 /// Create a copy of HierarchyTableState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? rows = null,Object? expanded = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? nodes = null,Object? rows = null,Object? expanded = null,}) {
   return _then(HierarchyTableSuccess(
-rows: null == rows ? _self._rows : rows // ignore: cast_nullable_to_non_nullable
+nodes: null == nodes ? _self._nodes : nodes // ignore: cast_nullable_to_non_nullable
+as List<Node>,rows: null == rows ? _self._rows : rows // ignore: cast_nullable_to_non_nullable
 as List<NodeRow>,expanded: null == expanded ? _self._expanded : expanded // ignore: cast_nullable_to_non_nullable
 as Set<String>,
   ));

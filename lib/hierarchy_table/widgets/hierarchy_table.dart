@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hierarchy_table_app/hierarchy_table/bloc/hierarchy_table_bloc.dart';
-import 'package:hierarchy_table_app/hierarchy_table/data/models/node.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 const _rowHeight = 48.0;
-const _depthIndent = 48.0;
+const _indentation = 48.0;
+const _columnWidth = 150.0;
 
 class HierarchyTable extends StatefulWidget {
   const HierarchyTable({required this.rows, super.key});
@@ -16,80 +16,87 @@ class HierarchyTable extends StatefulWidget {
 }
 
 class _HierarchyTableState extends State<HierarchyTable> {
-  final _columnWidthCache = <String, double>{};
+  late final List<TreeViewNode<NodeRow>> _tree;
 
-  double _getColumnWidth(BuildContext context, String key) {
-    return _columnWidthCache[key] ??= _measureText(context, key) + 64;
+  @override
+  void initState() {
+    super.initState();
+    _tree = _constructTree(widget.rows);
   }
 
-  double _measureText(BuildContext context, String text) {
-    final painter = TextPainter(
-      text: TextSpan(text: text, style: Theme.of(context).textTheme.bodyMedium),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-    )..layout();
+  List<TreeViewNode<NodeRow>> _constructTree(List<NodeRow> rows) {
+    final tree = <TreeViewNode<NodeRow>>[];
 
-    return painter.width;
+    for (final row in rows) {
+      tree.add(_constructTreeNode(row));
+    }
+
+    return tree;
+  }
+
+  TreeViewNode<NodeRow> _constructTreeNode(NodeRow row) {
+    return switch (row) {
+      HeaderNodeRow() => TreeViewNode(row),
+      DataNodeRow() => TreeViewNode(
+        row,
+        children: row.children.map(_constructTreeNode).toList(),
+      ),
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: widget.rows.length,
-      itemExtent: _rowHeight,
-      itemBuilder: (context, index) {
-        final row = widget.rows[index];
-        return switch (row) {
-          HeaderNodeRow(:final keys, :final depth) => _HeaderRow(
-            key: ValueKey('h_${row.depth}_${row.relation}'),
-            keys: keys,
-            depth: depth,
-            requestColumnWidth: _getColumnWidth,
+    return TreeView<NodeRow>(
+      tree: _tree,
+      treeRowBuilder: (node) {
+        return TreeRow(
+          extent: const FixedSpanExtent(_rowHeight),
+          backgroundDecoration: SpanDecoration(
+            color: switch (node.content) {
+              HeaderNodeRow() => Theme.of(context).colorScheme.primary,
+              DataNodeRow() => Theme.of(context).colorScheme.surface,
+            },
           ),
-          DataNodeRow(:final node, :final path) => _DataRow(
-            key: ValueKey('d_${row.path.join('.')}'),
-            node: node,
-            alternate: index.isEven,
-            path: path,
-            requestColumnWidth: _getColumnWidth,
-          ),
-        };
+        );
       },
+      treeNodeBuilder: _buildTreeNode,
+      indentation: TreeViewIndentationType.none,
     );
+  }
+
+  Widget _buildTreeNode(
+    BuildContext context,
+    TreeViewNode<NodeRow> node,
+    AnimationStyle toggleAnimationStyle,
+  ) {
+    return switch (node.content) {
+      HeaderNodeRow(:final keys) => _HeaderRow(keys: keys),
+      DataNodeRow() => _DataRow(
+        node: node,
+        row: node.content as DataNodeRow,
+        toggleAnimationStyle: toggleAnimationStyle,
+      ),
+    };
   }
 }
 
 class _HeaderRow extends StatelessWidget {
-  const _HeaderRow({
-    required this.keys,
-    required this.depth,
-    required this.requestColumnWidth,
-    super.key,
-  });
+  const _HeaderRow({required this.keys});
 
   final List<String> keys;
-  final int depth;
-  final double Function(BuildContext, String) requestColumnWidth;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Theme.of(context).colorScheme.primary,
-      padding: EdgeInsets.only(left: depth * _depthIndent + _depthIndent),
-      child: Row(
-        children: [
-          for (final key in keys)
-            _Cell(
-              width: requestColumnWidth(context, key),
-              child: Text(
-                key,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
-              ),
-            ),
-        ],
-      ),
+    return Row(
+      children: [
+        const SizedBox.square(dimension: _indentation),
+        for (final key in keys)
+          _Cell(
+            width: _columnWidth,
+            child: Text(key, overflow: TextOverflow.ellipsis),
+          ),
+        const _Cell(width: _columnWidth, child: Text('Actions')),
+      ],
     );
   }
 }
@@ -97,65 +104,57 @@ class _HeaderRow extends StatelessWidget {
 class _DataRow extends StatelessWidget {
   const _DataRow({
     required this.node,
-    required this.alternate,
-    required this.path,
-    required this.requestColumnWidth,
-    super.key,
+    required this.row,
+    required this.toggleAnimationStyle,
   });
 
-  final Node node;
-  final bool alternate;
-  final List<int> path;
-  final double Function(BuildContext, String) requestColumnWidth;
+  final TreeViewNode<NodeRow> node;
+  final DataNodeRow row;
+  final AnimationStyle toggleAnimationStyle;
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<HierarchyTableBloc>();
-    final expanded =
-        bloc.state is HierarchyTableSuccess &&
-        (bloc.state as HierarchyTableSuccess).expanded.contains(path.join('.'));
+    final animationDuration =
+        toggleAnimationStyle.duration ?? TreeView.defaultAnimationDuration;
+    final animationCurve =
+        toggleAnimationStyle.curve ?? TreeView.defaultAnimationCurve;
 
-    return Container(
-      color: alternate
-          ? Theme.of(context).colorScheme.surfaceTint
-          : Theme.of(context).colorScheme.surface,
-      padding: EdgeInsets.only(left: (path.length - 1) * _depthIndent),
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surface,
       child: Row(
         children: [
           if (node.children.isNotEmpty)
-            _Cell(
-              width: 48,
-              child: IconButton(
-                onPressed: () {
-                  context.read<HierarchyTableBloc>().add(
-                    HierarchyTableEvent.rowToggled(path: path),
-                  );
-                },
-                icon: RotatedBox(
-                  quarterTurns: expanded ? 1 : 0,
-                  child: const Icon(Icons.chevron_right),
+            SizedBox.square(
+              dimension: _indentation,
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: AnimatedRotation(
+                  turns: node.isExpanded ? 0.25 : 0.0,
+                  duration: animationDuration,
+                  curve: animationCurve,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: () {
+                      TreeViewController.of(context).toggleNode(node);
+                    },
+                    icon: const Icon(Icons.chevron_right),
+                  ),
                 ),
               ),
             ),
-          if (node.children.isEmpty) const SizedBox.square(dimension: 48),
-          for (final entry in node.data.entries)
+          if (node.children.isEmpty)
+            const SizedBox.square(dimension: _indentation),
+          for (final value in row.node.data.values)
             _Cell(
-              width: requestColumnWidth(context, entry.key),
-              child: Text(
-                entry.value.toString(),
-                style: Theme.of(context).textTheme.bodySmall,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              width: _columnWidth,
+              child: Text(value.toString(), overflow: TextOverflow.ellipsis),
             ),
-          const Spacer(),
           _Cell(
-            width: 48,
+            width: _columnWidth,
             child: IconButton(
+              padding: EdgeInsets.zero,
               onPressed: () {
-                context.read<HierarchyTableBloc>().add(
-                  HierarchyTableEvent.rowDeleted(path: path),
-                );
+                // TODO: Deletion
               },
               icon: const Icon(Icons.delete, color: Colors.red),
             ),
