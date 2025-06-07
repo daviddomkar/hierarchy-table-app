@@ -88,7 +88,7 @@ class _HeaderRow extends StatelessWidget {
                 ),
               ),
             ),
-          const _Cell(width: _depthIndent + 8, child: Text('Actions')),
+          const _Cell(width: _depthIndent + 16 child: Text('Actions')),
         ],
       ),
     );
@@ -152,7 +152,7 @@ class _DataRow extends StatelessWidget {
               ),
             ),
           _Cell(
-            width: _depthIndent + 8,
+            width: _depthIndent + 16,
             child: IconButton(
               onPressed: () {
                 context.read<HierarchyTableBloc>().add(
