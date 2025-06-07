@@ -122,7 +122,11 @@ class HierarchyTableBloc
 
   /// Constructs rows from nodes
   List<NodeRow> _constructRows(List<Node> nodes, Set<String> expanded) {
-    final rows = <NodeRow>[_constructHeaderRow('root', nodes, 0)];
+    final rows = <NodeRow>[];
+
+    if (nodes.isNotEmpty) {
+      rows.add(_constructHeaderRow('root', nodes, 0));
+    }
 
     void processNode(Node node, List<int> path) {
       // Add node row to rows
