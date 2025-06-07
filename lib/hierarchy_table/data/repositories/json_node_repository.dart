@@ -18,4 +18,10 @@ class JsonNodeRepository implements NodeRepository {
     final nodes = json.decode(data) as List<dynamic>;
     return nodes.cast<Map<String, dynamic>>().map(Node.fromJson).toList();
   }
+
+  @override
+  Future<void> saveNodes(List<Node> nodes) async {
+    // Just for demonstration, this could then be written to file or something
+    // final data = json.encode(nodes.map((node) => node.toJson()).toList());
+  }
 }

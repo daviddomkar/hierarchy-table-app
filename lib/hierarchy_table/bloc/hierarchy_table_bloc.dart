@@ -71,7 +71,10 @@ class HierarchyTableBloc
     }
   }
 
-  void _onRowDeleted(_RowDeleted event, Emitter<HierarchyTableState> emit) {
+  Future<void> _onRowDeleted(
+    _RowDeleted event,
+    Emitter<HierarchyTableState> emit,
+  ) async {
     if (state case HierarchyTableSuccess(:final expanded)) {
       final key = event.path.join('.');
 
@@ -83,6 +86,14 @@ class HierarchyTableBloc
         ..removeWhere(
           (element) => element == key || element.startsWith('$key.'),
         );
+
+      try {
+        await _nodeRepository.saveNodes(_nodes);
+      } catch (e) {
+        // Just for demonstration, in real app we would handle this better
+        emit(HierarchyTableState.failure(error: e.toString()));
+        rethrow;
+      }
 
       emit(
         HierarchyTableState.success(
