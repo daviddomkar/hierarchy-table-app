@@ -48,3 +48,7 @@ This app is a simple app that displays a hierarchy table according to the input 
 
 - Currently there is only basic error handleling with no custom exceptions or error messages
 - If app would grow, it would be definitely good to have more advanced error handling
+
+### Routing
+
+- If there were more features, it would be good to implement routing for navigation
